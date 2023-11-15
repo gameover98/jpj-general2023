@@ -1,0 +1,29 @@
+---
+- name: Configure system and services
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: Mount /var/www
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: 'nfs.gcp.internal:/nfs/varwww /var/www nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=600 1 2'
+        state: present
+
+    - name: Mount /etc/apache2
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: 'nfs.gcp.internal:/nfs/etc/apache2 /etc/apache2 nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=600 1 2'
+        state: present
+
+    - name: Ensure apache2 is enabled and running
+      ansible.builtin.systemd:
+        name: apache2
+        enabled: yes
+        state: started
+
+    - name: Ensure php8.1-fpm is enabled and running
+      ansible.builtin.systemd:
+        name: php8.1-fpm
+        enabled: yes
+        state: started
